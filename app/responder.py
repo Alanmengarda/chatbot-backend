@@ -9,7 +9,7 @@ import json
 from app.crawler import obter_conteudo_site
 
 # Chave de autenticação para acessar a API do OpenRouter (NUNCA compartilhe publicamente em produção)
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = ""
 
 def responder_com_base_no_site(pergunta, url):
     """

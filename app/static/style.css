@@ -1,0 +1,145 @@
+/*Define o visual da interface web do chatbot*/
+body {
+    background: linear-gradient(135deg, #232526 0%, #414345 100%);
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.chat-container {
+    width: 420px;
+    margin: 60px auto;
+    background: rgba(30, 32, 40, 0.95);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    padding: 28px 24px 18px 24px;
+    backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.chat-container::before {
+    content: "";
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, #00ffe7 0%, transparent 70%);
+    opacity: 0.18;
+    z-index: 0;
+}
+
+h2 {
+    color: #00ffe7;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 18px;
+    font-weight: 600;
+    text-shadow: 0 2px 12px #00ffe7a0;
+}
+
+#chat-box {
+    height: 320px;
+    overflow-y: auto;
+    border: 1.5px solid #232b3a;
+    padding: 14px;
+    margin-bottom: 16px;
+    background: rgba(25, 27, 34, 0.92);
+    border-radius: 10px;
+    box-shadow: 0 2px 12px #00ffe71a;
+    color: #e0e0e0;
+    font-size: 1.05em;
+    transition: box-shadow 0.3s;
+}
+
+.user, .bot {
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.5s;
+}
+
+.user {
+    align-items: flex-end;
+}
+
+.bot {
+    align-items: flex-start;
+}
+
+.user b, .bot b {
+    font-size: 0.95em;
+    opacity: 0.7;
+}
+
+.user {
+    color: #00ffe7;
+}
+
+.bot {
+    color: #fff;
+    background: linear-gradient(90deg, #00ffe7 0%, #0074d9 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#chat-form {
+    display: flex;
+    gap: 0;
+}
+
+#pergunta {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1.5px solid #00ffe7;
+    border-radius: 8px 0 0 8px;
+    background: rgba(20, 22, 30, 0.95);
+    color: #fff;
+    font-size: 1em;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 6px #00ffe71a;
+}
+
+#pergunta:focus {
+    border: 1.5px solid #0074d9;
+    box-shadow: 0 0 8px #00ffe7a0;
+}
+
+button {
+    padding: 0 28px;
+    border: none;
+    background: linear-gradient(90deg, #00ffe7 0%, #0074d9 100%);
+    color: #232526;
+    border-radius: 0 8px 8px 0;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 6px #00ffe71a;
+}
+
+button:hover {
+    background: linear-gradient(90deg, #0074d9 0%, #00ffe7 100%);
+    color: #fff;
+    box-shadow: 0 0 12px #00ffe7a0;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+    background: #232526;
+    border-radius: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: #00ffe7;
+    border-radius: 8px;
+    opacity: 0.3;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px);}
+    to { opacity: 1; transform: translateY(0);}
+}

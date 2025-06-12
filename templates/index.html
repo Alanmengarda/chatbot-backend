@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot Inteligente</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Chatbot Inteligente</h2>
+        <div id="chat-box"></div>
+        <form id="chat-form">
+            <input type="text" id="pergunta" placeholder="Digite sua pergunta..." autocomplete="off" required>
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+    <script>
+        const form = document.getElementById('chat-form');
+        const chatBox = document.getElementById('chat-box');
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const pergunta = document.getElementById('pergunta').value;
+            chatBox.innerHTML += `<div class="user"><b>Você:</b> ${pergunta}</div>`;
+            document.getElementById('pergunta').value = '';
+            const resp = await fetch('/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({pergunta})
+            });
+            const data = await resp.json();
+            chatBox.innerHTML += `<div class="bot"><b>Bot:</b> ${data.resposta}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+    </script>
+</body>
+</html>

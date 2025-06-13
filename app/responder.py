@@ -1,73 +1,51 @@
-#Recebe a pergunta e a URL do site, busca o conteúdo do site, 
-#Monta um prompt para a IA e consulta a API do OpenRouter para obter uma resposta baseada no conteúdo extraído.
-
-# Importa as bibliotecas necessárias para fazer requisições HTTP e manipular JSON
-import requests
-import json
-
-# Importa a função que faz o scraping do site e retorna o texto extraído
+import google.generativeai as genai
 from app.crawler import obter_conteudo_site
 
-# Chave de autenticação para acessar a API do OpenRouter (NUNCA compartilhe publicamente em produção)
-OPENROUTER_API_KEY = ""
+# Substitua pela sua chave da API Gemini
+GEMINI_API_KEY = "GOOGLE_API_KEY"
 
-def responder_com_base_no_site(pergunta, url):
+genai.configure(api_key=GEMINI_API_KEY)
+model_name = "gemini-1.5-flash-latest"
+model = genai.GenerativeModel(model_name)
+
+def responder_com_base_site_arquivo(pergunta, url, caminho_arquivo="content.txt"):
     """
-    Função principal que:
-    1. Busca o texto do site informado.
-    2. Monta um prompt (instrução) para a IA, incluindo o texto do site e a pergunta do usuário.
-    3. Envia esse prompt para a API do OpenRouter.
-    4. Retorna a resposta gerada pela IA.
+    Busca o texto do site e do arquivo, monta um prompt e usa a Gemini 1.5 Flash para responder.
     """
-
-    # Busca o texto do site usando o crawler
-    texto = obter_conteudo_site(url)
-
-    # Limita o texto para não ultrapassar o limite de tokens/caracteres da API
-    texto_limitado = texto[:600]
-
-    # Monta o prompt para a IA, orientando como ela deve responder
-    prompt = (
-        f"Se o usuario falar 'ola' ou 'oi', responda com 'Olá, como posso ajudar?'\n"
-        f"Se o usuario falar 'tchau'' ou 'adeus', responda com 'Tchau, até mais!'\n"
-        f"Seja educado e responda de forma clara e objetiva.\n"
-        f"Verifique imagens da pagina e responda com base nas informações contidas nelas.\n"
-        f"Você é um assistente virtual treinado para responder perguntas com base em informações extraídas de um site específico.\n"
-        f"Você deve navegar pelo site e extrair informações relevantes para responder à pergunta do usuário.\n"
-        f"Você deve considerar apenas as informações extraídas do site e não deve inventar respostas.\n"
-        f"Informações do site:\n\"\"\"\n{texto_limitado}\n\"\"\"\n"
-        f"Pergunta: {pergunta}\n"
-    )
-
-    # Define a URL da API do OpenRouter
-    url_api = "https://openrouter.ai/api/v1/chat/completions"
-
-    # Define os headers da requisição, incluindo a chave de autenticação
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    # Monta o corpo da requisição (payload) com o modelo e o prompt
-    data = {
-        "model": "deepseek/deepseek-r1:free",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ]
-    }
-
-    # Tenta enviar a requisição para a API e retorna a resposta da IA
     try:
-        response = requests.post(
-            url_api,
-            headers=headers,
-            data=json.dumps(data),
-            timeout=30
+        # Busca conteúdo do site
+        texto_site = obter_conteudo_site(url)
+        if not texto_site:
+            texto_site = "Não foi possível extrair informações do site."
+        texto_site_limitado = texto_site[:1000]
+
+        # Busca conteúdo do arquivo
+        try:
+            with open(caminho_arquivo, "r", encoding="utf-8") as f:
+                texto_arquivo = f.read()
+        except Exception:
+            texto_arquivo = ""
+        if not texto_arquivo:
+            texto_arquivo = "O arquivo está vazio ou não foi possível ler o conteúdo."
+        texto_arquivo_limitado = texto_arquivo[:1000]
+
+        # Monta o prompt unindo as duas fontes
+        prompt = (
+            f"Você é um assistente virtual brasileiro. Use apenas as informações abaixo para responder à pergunta do usuário de forma clara, objetiva e em português.\n"
+            f"Seja breve e direto, evitando repetições e informações irrelevantes.\n"
+            f"Responda apenas com base nas informações fornecidas, sem adicionar opiniões ou informações externas.\n"
+            f"Se a pergunta não puder ser respondida com as informações fornecidas, informe que não há dados suficientes.\n"
+            f"Seja educado e profissional em suas respostas.\n"
+            f"Limite suas respostas a 256 tokens.\n"
+            f"No final de cada resposta, pergunte se o usuário precisa de mais alguma coisa.\n"
+            f"Conteúdo do site ({url}):\n\"\"\"\n{texto_site_limitado}\n\"\"\"\n"
+            f"Conteúdo do arquivo ({caminho_arquivo}):\n\"\"\"\n{texto_arquivo_limitado}\n\"\"\"\n"
+            f"Pergunta: {pergunta}\n"
+            f"Se o usuario falar algo como,'oi', 'olá', 'oi, tudo bem?', 'olá, tudo bem?' ou 'oi, tudo bem com você?', responda com uma saudação amigável e com a mensagem 'Como posso ajudar?'.\n"
+            f"Responda apenas com base nas informações fornecidas."
         )
-        response.raise_for_status()  # Lança erro se a resposta for ruim (ex: 401, 500)
-        resposta = response.json()   # Converte a resposta JSON em dicionário Python
-        # Extrai o texto da resposta gerada pela IA
-        return resposta["choices"][0]["message"]["content"]
+
+        response = model.generate_content(prompt)
+        return response.text.strip()
     except Exception as e:
-        # Em caso de erro, retorna uma mensagem informando o erro
-        return f"Erro ao consultar OpenRouter: {e}"
+        return f"Ocorreu um erro ao processar sua solicitação: {e}"

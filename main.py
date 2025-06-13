@@ -5,26 +5,12 @@
 from flask import Flask, render_template
 from app.api import chatbot_api
 
-app = Flask(__name__)  #Cria a aplicação Flask.
-app.register_blueprint(chatbot_api) #Registra as rotas da API.
+app = Flask(__name__)
+app.register_blueprint(chatbot_api)
 
-@app.route("/") # Rota principal que renderiza o template index.html. / retorna a página HTML do chatbot.
+@app.route("/")
 def index():
     return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
-    
-    
-    
-"""
-
-O usuário acessa o site e envia uma pergunta.
-Frontend faz uma requisição POST para /chat com a pergunta.
-API (api.py) recebe a pergunta, define o site a ser pesquisado e chama responder_com_base_no_site.
-responder.py busca o conteúdo do site, monta o prompt e consulta a IA do OpenRouter.
-A resposta da IA é enviada de volta para o frontend e exibida ao usuário.
-
-
-
-"""
